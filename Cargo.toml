@@ -1,0 +1,6 @@
+[package]
+name = "fujifilm-wifi-client-rs"
+version = "0.1.0"
+authors = ["jacob"]
+
+[dependencies]
