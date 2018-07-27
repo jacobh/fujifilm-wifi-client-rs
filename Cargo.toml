@@ -5,3 +5,5 @@ authors = ["jacob"]
 
 [dependencies]
 tokio = "0.1"
+bytes = "0.4.9"
+byteorder = "1.2.3"

@@ -78,6 +78,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "fujifilm-wifi-client-rs"
 version = "0.1.0"
 dependencies = [
+ "byteorder 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bytes 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

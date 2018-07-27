@@ -1,5 +1,7 @@
+extern crate byteorder;
 extern crate tokio;
 
+use byteorder::ByteOrder;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tokio::prelude::*;
 // use tokio::reactor::{Reactor, Handle};
@@ -23,6 +25,37 @@ fn connect(port: u16) -> impl Future<Item = TcpStream, Error = tokio::io::Error>
             println!("failed to connect!");
             e
         })
+}
+
+fn fuji_send<T: Into<Vec<u8>>>(
+    stream: TcpStream,
+    data: T,
+) -> impl Future<Item = TcpStream, Error = tokio::io::Error> {
+    let data = data.into();
+    let data_length = data.len() as u32;
+    let length_bytes = {
+        let mut buf = [0; 4];
+        byteorder::LittleEndian::write_u32(&mut buf, data_length);
+        buf
+    };
+
+    tokio::io::write_all(stream, length_bytes)
+        .and_then(|(stream, _)| tokio::io::write_all(stream, data))
+        .map(|(stream, _)| stream)
+}
+
+fn fuji_receive(
+    stream: TcpStream,
+) -> impl Future<Item = (TcpStream, Vec<u8>), Error = tokio::io::Error> {
+    tokio::io::read_exact(stream, [0u8; 4]).and_then(|(stream, length_bytes)| {
+        let total_length = byteorder::LittleEndian::read_u32(&length_bytes);
+        if total_length < 4 {
+            println!("Invalid message, length less than header");
+        }
+        let body_length = total_length - 4;
+
+        tokio::io::read_exact(stream, vec![0u8; body_length as usize])
+    })
 }
 
 struct RegistrationMessage {
