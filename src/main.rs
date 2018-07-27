@@ -94,18 +94,19 @@ impl RegistrationMessage {
 fn main() {
     tokio::run(
         connect(CONTROL_SERVER_PORT)
-            .map(|stream| {
+            .and_then(|stream| {
                 println!("got stream");
-                let registration_message = RegistrationMessage::new("Jacobs Laptop");
+                let registration_message = RegistrationMessage::new("JacobsLaptop");
                 fuji_send(stream, registration_message.bytes()).and_then(|stream| {
                     println!("sent bytes");
                     fuji_receive(stream).map(|(stream, resp)| {
+                        println!("got a message back");
                         println!("{:?}", resp);
                         ()
                     })
                 })
             })
             .map(|_| ())
-            .map_err(|_| ()),
+            .map_err(|e| println!("{:?}", e)),
     );
 }
