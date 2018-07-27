@@ -97,16 +97,17 @@ fn main() {
             .and_then(|stream| {
                 println!("got stream");
                 let registration_message = RegistrationMessage::new("JacobsLaptop");
-                fuji_send(stream, registration_message.bytes()).and_then(|stream| {
-                    println!("sent bytes");
-                    fuji_receive(stream).map(|(stream, resp)| {
-                        println!("got a message back");
-                        println!("{:?}", resp);
-                        ()
-                    })
-                })
+                fuji_send(stream, registration_message.bytes())
             })
-            .map(|_| ())
+            .and_then(|stream| {
+                println!("sent bytes");
+                fuji_receive(stream)
+            })
+            .map(|(stream, resp)| {
+                println!("got a message back");
+                println!("{:?}", resp);
+                ()
+            })
             .map_err(|e| println!("{:?}", e)),
     );
 }
