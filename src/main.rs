@@ -67,6 +67,11 @@ impl RegistrationMessage {
             client_name: client_name.into(),
         }
     }
+    fn bytes(&self) -> Vec<u8> {
+        let mut x = self.header();
+        x.append(&mut self.client_name());
+        x
+    }
     fn header(&self) -> Vec<u8> {
         vec![
             0x01, 0x00, 0x00, 0x00, 0xf2, 0xe4, 0x53, 0x8f, 0xad, 0xa5, 0x48, 0x5d, 0x87, 0xb2,
@@ -87,5 +92,20 @@ impl RegistrationMessage {
 }
 
 fn main() {
-    tokio::run(connect(CONTROL_SERVER_PORT).map(|_| ()).map_err(|_| ()));
+    tokio::run(
+        connect(CONTROL_SERVER_PORT)
+            .map(|stream| {
+                println!("got stream");
+                let registration_message = RegistrationMessage::new("Jacobs Laptop");
+                fuji_send(stream, registration_message.bytes()).and_then(|stream| {
+                    println!("sent bytes");
+                    fuji_receive(stream).map(|(stream, resp)| {
+                        println!("{:?}", resp);
+                        ()
+                    })
+                })
+            })
+            .map(|_| ())
+            .map_err(|_| ()),
+    );
 }
